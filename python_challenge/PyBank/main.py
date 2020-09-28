@@ -4,6 +4,7 @@ from bs4 import BeautifulSoup
 import os
 import pdb
 import csv
+#python3 main.py > output.txt
 #https://stackoverflow.com/questions/43891391/pandas-dataframe-read-skipping-line-xxx-expected-x-fields-saw-y
 #url = "https://gt.bootcampcontent.com/GT-Coding-Boot-Camp/gt-atl-data-pt-09-2020-u-c/raw/master/02-Homework/03-Python/Instructions/PyBank/Resources/budget_data.csv"
 #inpFile = pd.read_csv(url, sep='\t', error_bad_lines= False,quoting=csv.QUOTE_NONE)
@@ -11,35 +12,65 @@ import csv
 
 # Path to collect data from the Resources folder
 pybank_csv = os.path.join('.', 'resources', '02-Homework_03-Python_Instructions_PyBank_Resources_budget_data.csv')
-df = pd.read_csv(pybank_csv)
-
-
 
 #The total number of months included in the dataset
-total_months =len(df["Date"].str.extract(r'([a-zA-Z]{3})')[0])#Total non-unique Months found
-print(f'Total Months: {total_months}')
-#len(df["Date"].str.extract(r'([a-zA-Z]{3})')[0].unique())#Unique Months found
-
+count_months = 0
+with open(pybank_csv) as csv_file:
+    csv_reader = csv.reader(csv_file, delimiter = ",")
+    next(csv_reader)# Skips the header row
+    for row in csv_reader:
+        count_months = count_months + 1
+print(f'Total Months: {count_months}')
 
 #The net total amount of "Profit/Losses" over the entire period
-net_total = df["Profit/Losses"].sum()
-print(f'Total: ${net_total}')
-
+net_profit = 0
+with open(pybank_csv) as csv_file:
+    csv_reader = csv.reader(csv_file, delimiter = ",")
+    next(csv_reader)# Skips the header row
+    for row in csv_reader:
+        net_profit = net_profit + float(row[1])
+print(f'Total: ${net_profit:.0f}')
 
 #The average of the changes in "Profit/Losses" over the entire period
-df['Change in Profit/Losses'] = df['Profit/Losses'].diff()
-average_change = df['Change in Profit/Losses'].sum()/(total_months-1)
-print(f'Average Change: ${average_change}')
-
+with open(pybank_csv) as csv_file:
+    csv_reader = csv.reader(csv_file, delimiter = ",")
+    next(csv_reader)# Skips the header row
+    old = 0
+    change_profit=[]
+    for row in csv_reader:
+        change_profit.append(float(row[1]) - old)
+        old = float(row[1])
+#pdb.set_trace()
+print(f'Total: ${sum(change_profit[1:])/(len(change_profit)-1):.2f}')
 
 #The greatest increase in profits (date and amount) over the entire period
-greatest_inc = df['Change in Profit/Losses'].max()
-greatest_inc_date = df.loc[df['Change in Profit/Losses'] == greatest_inc]['Date'].values[0]
-print(f'Greatest Increase in Profits: {greatest_inc_date} (${greatest_inc})')
-
+with open(pybank_csv) as csv_file:
+    csv_reader = csv.reader(csv_file, delimiter = ",")
+    next(csv_reader)# Skips the header row
+    old = 0
+    change_profit=[]
+    max_change = 0
+    date = ''
+    for row in csv_reader:
+        change_profit = float(row[1]) - old
+        old = float(row[1])
+        if change_profit > max_change:
+            max_change = change_profit
+            date = row[0]
+print(f'Greatest Increase in Profits: {date} $({max_change:.0f})')
 
 #The greatest decrease in losses (date and amount) over the entire period
-greatest_dec = df['Change in Profit/Losses'].min()
-greatest_dec_date = df.loc[df['Change in Profit/Losses'] == greatest_dec]['Date'].values[0]
-print(f'Greatest Increase in Profits: {greatest_dec_date} (${greatest_dec})')
-#pdb.set_trace()
+with open(pybank_csv) as csv_file:
+    csv_reader = csv.reader(csv_file, delimiter = ",")
+    next(csv_reader)# Skips the header row
+    old = 0
+    change_profit=[]
+    max_dec = 0
+    date = ''
+    for row in csv_reader:
+        change_profit = float(row[1]) - old
+        old = float(row[1])
+        if change_profit < max_dec:
+            max_dec = change_profit
+            date = row[0]
+print(f'Greatest Decrease in Profits: {date} $({max_dec:.0f})')

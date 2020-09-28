@@ -1,46 +1,50 @@
-import numpy as np
+import pandas as pd
+import pdb
+import csv
+import os
+#python3 main.py > output.txt
 
-#url = 'https://gt.bootcampcontent.com/GT-Coding-Boot-Camp/gt-atl-data-pt-09-2020-u-c/raw/master/02-Homework/03-Python/Instructions/PyPoll/Resources/election_data.csv'
-#pd.set_option("display.max_rows", None, "display.max_columns", None)
-#url = 'https://gt.bootcampcontent.com/GT-Coding-Boot-Camp/gt-atl-data-pt-09-2020-u-c/raw/master/02-Homework/03-Python/Instructions/PyPoll/Resources/election_data.csv?raw=true'
-#pd.read_csv(url, error_bad_lines=False)
-
-#ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDMnij/JtZA6P6t4npEiM7wcjj3Lt7xYFNGsQnXrGHf4vpHwMHkiZe865guadpmLJYUhDoTxdn2TSXfEcPHq5vSG1lJweqj31M9/tg+F2oTm1y/JKMhoFNSpaxlaqRibZ1lle8IaG/BCZML/zxHm442skqy3w0rz5HD+ydAhPO1I4g7nI8n28Ok5vThFad4qYISIw3PiU70wGZSxueoDP5ejr6MJ4G8peALn24ZFqSvhIeyDpAv4URd6kKPLVBCOcTZSLSRXBQWXRrWFxPzqeqo2mzxVESfOaja1N61WfPNZVRVgVkk5HASvtj7pEVWb7xQ4BarIp4S5P3uasvtwRab071K61XUsuAQ88D1oXIZ+D9xNoQlA4Lr6UTks3c7ebv4QItX106wc7YTr5O/o90DdVxJQzZlTHTXbbtzRAXu9MGWG+Arxpm6a/xr1T8yNfMeOzLqVhjIYXyqgpMg4A9BiThZS5QXdnq+6CKHCkkCPscTSxKNZfoo1oZFZYTMtS2CIx2FNMvoctkP+GpTytjlbWYUAMYM4h223bCtywhLjAJZV3ZnpCOX7IPuYI9fTVNVOWk5Z0DwNvnx8hAqO3kgxBkr+qwsFWW97BLDAwz71v2nshm1bJ+UrS2vCSNZRh39CcaSuWhhNZ0Qj1udA/niYHdhTp7JINmbvjm2Svvkfw== davidcoy@ptotonmail.com
-
-
-import re
-import sys
-import requests
-import gitlab
+try:
+    pypoll_csv = os.path.join('.', 'resources', '02-Homework_03-Python_Instructions_PyPoll_Resources_election_data.csv')
+    df = pd.read_csv(pypoll_csv)
+except:
+    print("No local file!")
+    url = 'https://raw.githubusercontent.com/David-Coy/HW03/master/python_challenge/PyPoll/resources/02-Homework_03-Python_Instructions_PyPoll_Resources_election_data.csv'
+    df = pd.read_csv(url)
 
 
-URL = 'https://gitlab.com'
-SIGN_IN_URL = 'https://gitlab.com/users/sign_in'
-LOGIN_URL = 'https://gitlab.com/users/sign_in'
 
-session = requests.Session()
+print(df)
 
-#sign_in_page = session.get(SIGN_IN_URL).content
-sign_in_page = session.get(SIGN_IN_URL).text
-for l in sign_in_page.split('\n'):
-    m = re.search('name="authenticity_token" value="([^"]+)"', l)
-    if m:
-        break
+print('Election Results \n')
+#The total number of votes cast
+total_voters = len(df['Voter ID'].unique())
+print(f'Total Voters: {total_voters}')
+#A complete list of candidates who received votes
+candidates_unique = len(df['Candidate'].unique())
 
-d = None
-if m:
-    token = m.group(1)
+#The percentage of votes each candidate won
+#The total number of votes each candidate won
+vote_summary = df['Candidate'].value_counts()
+#df_new = pd.DataFrame(columns =['Candidate', 'Percent', 'Votes'])
+df_new = pd.DataFrame()
+for candidate in df['Candidate'].unique():
+    candidate_votes = vote_summary[candidate]
+    print(f'{candidate}: {candidate_votes/total_voters*100:.3f}% ({candidate_votes})')
+    '''
+    dict = {'Candidate': [candidate],
+            'Percent':[candidate_votes/total_voters*100],
+            'Votes':[candidate_votes]}
+    '''
+    df_temp = pd.DataFrame.from_dict({'Candidate': [candidate],
+            'Percent':[candidate_votes/total_voters*100],
+            'Votes':[candidate_votes]})
+    df_new = pd.concat([df_new,df_temp])
+    
+#The winner of the election based on popular vote.
+#df.loc[df['Change in Profit/Losses'] == greatest_dec]['Date'].values[0]
+#df_new.loc[df_new['Percent'] == df_new['Percent'].max()]
+winner = df_new.loc[df_new['Percent'] == df_new['Percent'].max()]['Candidate'].values[0]
+print(f'Winner: {winner}')
 
-if not token:
-    print('Unable to find the authenticity token')
-    sys.exit(1)
 
-data = {'user[login]': 'davidcoy@protonmail.com',
-        'user[password]': 'e4svummyFootbag!',
-        'authenticity_token': PCgwzKvL-QnCBg1eqsQQ}
-r = session.post(LOGIN_URL, data=data)
-if r.status_code != 200:
-    print('Failed to log in')
-    sys.exit(1)
-
-gl = gitlab.Gitlab(URL, api_version=4, session=session)
