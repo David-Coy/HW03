@@ -2,49 +2,50 @@ import pandas as pd
 import pdb
 import csv
 import os
-#python3 main.py > output.txt
 
-try:
-    pypoll_csv = os.path.join('.', 'resources', '02-Homework_03-Python_Instructions_PyPoll_Resources_election_data.csv')
-    df = pd.read_csv(pypoll_csv)
-except:
-    print("No local file!")
-    url = 'https://raw.githubusercontent.com/David-Coy/HW03/master/python_challenge/PyPoll/resources/02-Homework_03-Python_Instructions_PyPoll_Resources_election_data.csv'
-    df = pd.read_csv(url)
+pypoll_csv = os.path.join('.', 'resources', '02-Homework_03-Python_Instructions_PyPoll_Resources_election_data.csv')
 
+print("\n Election Results \n")
+print('-'*20)
 
-
-print(df)
-
-print('Election Results \n')
 #The total number of votes cast
-total_voters = len(df['Voter ID'].unique())
-print(f'Total Voters: {total_voters}')
+count_votes = 0
+with open(pypoll_csv) as csv_file:
+    csv_reader = csv.reader(csv_file, delimiter = ",")
+    next(csv_reader)# Skips the header row
+    for row in csv_reader:
+        count_votes = count_votes + 1
+print(f'Total Votes: {count_votes}')
+print('-'*20)
+
 #A complete list of candidates who received votes
-candidates_unique = len(df['Candidate'].unique())
+list_candidates = []
+dict_candidates = {}
+with open(pypoll_csv) as csv_file:
+    csv_reader = csv.reader(csv_file, delimiter = ",")
+    next(csv_reader)# Skips the header row
+    for row in csv_reader:
+        name = row[2]
+        if list_candidates.count(name) < 1:#Check if candidate already exists in list
+            list_candidates.append(name)
+            dict_candidates[name] = 0
+        dict_candidates[name] = dict_candidates[name] +1
 
 #The percentage of votes each candidate won
+
 #The total number of votes each candidate won
-vote_summary = df['Candidate'].value_counts()
-#df_new = pd.DataFrame(columns =['Candidate', 'Percent', 'Votes'])
-df_new = pd.DataFrame()
-for candidate in df['Candidate'].unique():
-    candidate_votes = vote_summary[candidate]
-    print(f'{candidate}: {candidate_votes/total_voters*100:.3f}% ({candidate_votes})')
-    '''
-    dict = {'Candidate': [candidate],
-            'Percent':[candidate_votes/total_voters*100],
-            'Votes':[candidate_votes]}
-    '''
-    df_temp = pd.DataFrame.from_dict({'Candidate': [candidate],
-            'Percent':[candidate_votes/total_voters*100],
-            'Votes':[candidate_votes]})
-    df_new = pd.concat([df_new,df_temp])
-    
-#The winner of the election based on popular vote.
-#df.loc[df['Change in Profit/Losses'] == greatest_dec]['Date'].values[0]
-#df_new.loc[df_new['Percent'] == df_new['Percent'].max()]
-winner = df_new.loc[df_new['Percent'] == df_new['Percent'].max()]['Candidate'].values[0]
+for candidate in list_candidates:
+    print(f'{candidate}: {dict_candidates[candidate]/count_votes*100:.3f}% ({dict_candidates[candidate]:.0f})')
+
+#The winner of the election based on popular vote.]
+
+#print(f'Winner: {winner}')
+def keywithmaxval(dict):
+     list_values = list(dict.values()) #List of values of each key
+     list_keys = list(dict.keys()) #List of each key
+     return list_keys[list_values.index(max(list_values))]
+
+print('-'*20)
+winner = keywithmaxval(dict_candidates)
 print(f'Winner: {winner}')
-
-
+print('-'*20)
