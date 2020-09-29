@@ -1,22 +1,13 @@
-         Voter ID County Candidate
-0        12864552  Marsh      Khan
-1        17444633  Marsh    Correy
-2        19330107  Marsh      Khan
-3        19865775  Queen      Khan
-4        11927875  Marsh      Khan
-...           ...    ...       ...
-3520996  18050509  Marsh      Khan
-3520997  13060332  Marsh      Khan
-3520998  16754708  Queen      Khan
-3520999  12083146  Queen      Khan
-3521000  14526187  Queen  O'Tooley
 
-[3521001 rows x 3 columns]
-Election Results 
+ Election Results 
 
-Total Voters: 3521001
+--------------------
+Total Votes: 3521001
+--------------------
 Khan: 63.000% (2218231)
 Correy: 20.000% (704200)
 Li: 14.000% (492940)
 O'Tooley: 3.000% (105630)
+--------------------
 Winner: Khan
+--------------------
